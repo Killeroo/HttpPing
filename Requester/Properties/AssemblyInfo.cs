@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Requester")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Small ping-like tool capable of sending HTTP requests")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("web-ping")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCompany("Matthew Carney")]
+[assembly: AssemblyProduct("Requester")]
+[assembly: AssemblyCopyright("Copyright © Matthew Carney 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

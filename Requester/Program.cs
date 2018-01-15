@@ -43,21 +43,33 @@ namespace web_ping
                     switch (arg)
                     {
                         case "-?":
+                        case "--?":
+                        case "/?":
                             Console.WriteLine(USAGE);
                             Environment.Exit(0);
                             break;
                         case "-i":
+                        case "--i":
+                        case "/i":
                             Interval = args[count + 1]
                         case "-t":
+                        case "--t":
+                        case "/t":
                             Infinite = true;
                             break;
                         case "-n":
+                        case "--n":
+                        case "/n":
                             count = arg[count + 1]
                             break;
                         case "-d":
+                        case "--d":
+                        case "/d":
                             Detailed = true;
                             break;
                         case "-ts":
+                        case "--ts":
+                        case "/ts":
                             Timestamp = true;
                         default:
                             if (arg.Contains("-"))
@@ -128,7 +140,7 @@ namespace web_ping
 
             // Send requests
             int index = 0;
-            Console.WriteLine("Sending HTTP requests to {0}...", query);
+            Console.WriteLine("Sending HTTP requests to {0}:", query);
             while (Infinite ? true : index <= Requests)
             {
                 try
