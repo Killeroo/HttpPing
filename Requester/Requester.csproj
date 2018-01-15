@@ -7,8 +7,8 @@
     <ProjectGuid>{D4D36105-4AC4-4AD6-92DD-5EF9A05AF312}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>web_ping</RootNamespace>
-    <AssemblyName>web-ping</AssemblyName>
+    <RootNamespace>Requester</RootNamespace>
+    <AssemblyName>Requester</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
