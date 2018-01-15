@@ -130,6 +130,7 @@ namespace web_ping
             
         }
 
+        // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
         static void HttpRequestLoop(string query)
         {
             // Construct request
