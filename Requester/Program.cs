@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Net;
 using System.Threading;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace web_ping
         public static ConsoleColor DefaultForegroundColor;
 
         // Constants
-        public const string USAGE = "USAGE: Requester.exe web_address [-d] [-t] [-ts] [-n count] [-i interval]";
+        public const string USAGE = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval]";
 
         static void Main(string[] args)
         {
@@ -37,7 +38,7 @@ namespace web_ping
             // Parse arguments
             try 
             {
-                for (int count = 0; count <= args.Length; count++)
+                for (int count = 0; count < args.Length; count++)
                 {
                     string arg = args[count];
                     switch (arg)
@@ -51,7 +52,8 @@ namespace web_ping
                         case "-i":
                         case "--i":
                         case "/i":
-                            Interval = args[count + 1]
+                            Interval = Convert.ToInt32(args[count + 1]);
+                            break;
                         case "-t":
                         case "--t":
                         case "/t":
@@ -60,7 +62,7 @@ namespace web_ping
                         case "-n":
                         case "--n":
                         case "/n":
-                            count = arg[count + 1]
+                            Requests = Convert.ToInt32(args[count + 1]);
                             break;
                         case "-d":
                         case "--d":
@@ -71,6 +73,7 @@ namespace web_ping
                         case "--ts":
                         case "/ts":
                             Timestamp = true;
+                            break;
                         default:
                             if (arg.Contains("-"))
                                 throw new ArgumentException();
@@ -90,44 +93,38 @@ namespace web_ping
                 Console.WriteLine(USAGE);
                 Environment.Exit(1);
             }
-            catch (Exception e)
+            catch (FormatException)
             {
-                Error(e.GetType().GetString());
+                Error("Could not convert argument");
                 Console.WriteLine(USAGE);
                 Environment.Exit(1);
             }
-            
+            catch (Exception e)
+            {
+                Error(e.GetType().ToString());
+                Console.WriteLine(USAGE);
+                Environment.Exit(1);
+            }
+
             // Find address
-            if (IsWellFormedUriString(args.first(), UriKind.RelativeOrAbsolute))
-                query = args.first();
-            else if (IsWellFormedUriString(args.last(), UriKind.RelativeOrAbsolute))
-                query = args.last();
+            string query = "";
+            if (Uri.IsWellFormedUriString(args.First(), UriKind.RelativeOrAbsolute))
+                query = args.First();
+            else if (Uri.IsWellFormedUriString(args.Last(), UriKind.RelativeOrAbsolute))
+                query = args.Last();
             else
             {
                 Error("Could not find URL/Web address");
-                Enviroment.Exit(1);
+                Environment.Exit(1);
             }
-
-            // validate and sanitise address (add http part)
-            string query = "";
-            //Uri result;
-            query = args[0];
+            // Add http part if not already there
             if (!query.Contains("http"))
-            {
                 query = query.Insert(0, "http://");
-            }
-            //if (Uri.TryCreate(query, UriKind.Absolute, out result)
-            //    && (result.Scheme != Uri.UriSchemeHttp || result.Scheme != Uri.UriSchemeHttps))
-            //{
-            //    Console.Write("Incorrect URL format");
-            //    Environment.Exit(1);
-            //}
 
             // Send requests
             HttpRequestLoop(query);
 
             // Results?
-            
         }
 
         // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
@@ -151,16 +148,23 @@ namespace web_ping
                 }
                 catch (WebException e)
                 {
-                    Error(e.Message);
+                    Error(e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
                 }
                 catch (Exception e)
                 {
-                    Error(e.GetType().ToString() + ":" + e.Message);
+                    Error(e.GetType().ToString() + ":" + e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
                 }
 
-                // Wait interval and increment requests sent
-                index++;
-                Thread.Sleep(Interval);
+                if ((index+1) != Requests)
+                {
+                    // Wait interval and increment requests sent
+                    index++;
+                    Thread.Sleep(Interval);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
@@ -186,7 +190,7 @@ namespace web_ping
             Console.Write(" Size={0}", response.ContentLength);
             
             if (Detailed)
-                Console.Write("Server={0} Cached={1}", response.Server, response.IsFromCache);
+                Console.Write(" Server={0} Cached={1}", response.Server, response.IsFromCache);
         
             if (Timestamp)
                 Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
