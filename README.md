@@ -13,6 +13,7 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/Requester/rele
 - Results coloration 
 - Ping like functionality
 - HTTP and HTTPS support
+- Common Log Format (NCSA log format)
 
 ## Usage: 
      Requester web_address [-d] [-t] [-ts] [-n count] [-i interval]
@@ -23,6 +24,8 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/Requester/rele
      [-n count]     Send a specific number of requests
      [-ts]          Include timestamp of when each request was sent
      [-i interval]  Interval between each request in milliseconds (default 30000)
+     [-l]           Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
+     [-nc]          No color
      
 ## License
 

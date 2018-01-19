@@ -12,7 +12,8 @@ namespace web_ping
         public static bool Infinite = false;
         public static bool Detailed = false;
         public static bool Timestamp = false;
-        public static bool UseCommonLogFormat = false; //https://en.wikipedia.org/wiki/Common_Log_Format
+        public static bool NoColor = false;
+        public static bool UseCommonLogFormat = false; 
         public static int Interval = 30000;
         public static int Requests = 5;
 
@@ -21,7 +22,9 @@ namespace web_ping
         public static ConsoleColor DefaultForegroundColor;
 
         // Constants
-        public const string USAGE = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval]";
+        public const string USAGE = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc]";
+
+        private static string resolvedAddress = "";
 
         static void Main(string[] args)
         {
@@ -64,6 +67,16 @@ namespace web_ping
                         case "--n":
                         case "/n":
                             Requests = Convert.ToInt32(args[count + 1]);
+                            break;
+                        case "-l":
+                        case "--l":
+                        case "/l":
+                            UseCommonLogFormat = true;
+                            break;
+                        case "-nc":
+                        case "--nc":
+                        case "/nc":
+                            NoColor = true;
                             break;
                         case "-d":
                         case "--d":
@@ -122,6 +135,10 @@ namespace web_ping
             if (!query.Contains("http"))
                 query = query.Insert(0, "http://");
 
+            // Extract host and perform DNS lookup
+            Uri queryUri = new Uri(query);
+            resolvedAddress = LookupAddress(queryUri.Host);
+
             // Send requests
             HttpRequestLoop(query);
 
@@ -171,36 +188,59 @@ namespace web_ping
 
         static void DisplayResponse(HttpWebResponse response, string address)
         {
-            Console.Write("Reponse from {0}: Code=", address);
+            // !!HACK ALERT!!
 
-            // Apply colour rules to http status code
-            //x >= 1 && x <= 100
-            Console.ForegroundColor = ConsoleColor.Black;
-            int statusCode = (int)response.StatusCode;
-            if (statusCode >= 100 && statusCode <= 199)
-                // Informative
-                Console.BackgroundColor = ConsoleColor.Blue;
-            else if (statusCode >= 200 && statusCode <= 299)
-                // Success
-                Console.BackgroundColor = ConsoleColor.Green;
-            else if (statusCode >= 300 && statusCode <= 399)
-                // Redirection
-                Console.BackgroundColor = ConsoleColor.Cyan;
-            else if (statusCode >= 400 && statusCode <= 499)
-                // Client errors
-                Console.BackgroundColor = ConsoleColor.Yellow;
-            else if (statusCode >= 500 && statusCode <= 599)
-                // Server errors
-                Console.BackgroundColor = ConsoleColor.Red;
-            else
-                // Other
-                Console.BackgroundColor = ConsoleColor.Magenta;
+            if (!UseCommonLogFormat)
+                Console.Write("Response from {0}: Code=", new Uri(address).Host.ToString());
+
+            if (!NoColor)
+            {
+                // Apply colour rules to http status code
+                Console.ForegroundColor = ConsoleColor.Black;
+                int statusCode = (int)response.StatusCode;
+                if (statusCode >= 100 && statusCode <= 199)
+                    // Informative
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                else if (statusCode >= 200 && statusCode <= 299)
+                    // Success
+                    Console.BackgroundColor = ConsoleColor.Green;
+                else if (statusCode >= 300 && statusCode <= 399)
+                    // Redirection
+                    Console.BackgroundColor = ConsoleColor.Cyan;
+                else if (statusCode >= 400 && statusCode <= 499)
+                    // Client errors
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                else if (statusCode >= 500 && statusCode <= 599)
+                    // Server errors
+                    Console.BackgroundColor = ConsoleColor.Red;
+                else
+                    // Other
+                    Console.BackgroundColor = ConsoleColor.Magenta;
+            }
+
+            if (UseCommonLogFormat)
+            {
+                Uri addrUri = new Uri(address);
+                Console.WriteLine("{6} {0} [{1:dd/MMM/yyyy HH:mm:ss zzz}] \"GET {2} {3}/1.0\" {4} {5}",
+                                  addrUri.Host,
+                                  DateTime.Now,
+                                  addrUri.AbsolutePath,
+                                  addrUri.Scheme.ToString().ToUpper(),
+                                  ((int)response.StatusCode).ToString(),
+                                  response.ContentLength,
+                                  resolvedAddress);
+                if (!NoColor)
+                    ResetConsoleColors();
+
+                return;
+            }
 
             // Display response content
             Console.Write("{0}:{1}",
                 (int)response.StatusCode,
                 response.StatusCode);
-            ResetConsoleColors();
+            if (!NoColor)
+                ResetConsoleColors();
             Console.Write(" Size={0}", response.ContentLength);
             
             if (Detailed)
@@ -209,17 +249,37 @@ namespace web_ping
             if (Timestamp)
                 Console.Write(" @ {0}", DateTime.Now.ToString("HH:mm:ss"));
 
-            // 127.0.0.1 user-identifier frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-            if (UseCommonLogFormat) {
-                Console.WriteLine("{0} {7} [{1:dd/MMM/yyyy:HH:mm:ss zzz] \"GET {3} {4}/1.0\" {5} {6}",
-                                  address,
-                                  DateTime.Now, 
-                                  address.Split('/').Last(),
-                                  (int) response.StatusCode,
-                                  response.ContentLength);    
-            }
-
             Console.WriteLine();
+        }
+
+        static string LookupAddress(string address)
+        {
+            IPAddress ipAddr = null;
+
+            // Only resolve address if not already in IP address format
+            if (IPAddress.TryParse(address, out ipAddr))
+                return ipAddr.ToString();
+
+            try
+            {
+                // Query DNS for host address
+                foreach (IPAddress a in Dns.GetHostEntry(address).AddressList)
+                {
+                    // Run through addresses until we find one that matches the family we are forcing
+                    if (a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        ipAddr = a;
+                        break;
+                    }
+                }
+            }
+            catch (Exception) { }
+
+            // If no address resolved then exit
+            if (ipAddr == null)
+                return "";
+
+            return ipAddr.ToString();
         }
 
         static void Error(string msg)
