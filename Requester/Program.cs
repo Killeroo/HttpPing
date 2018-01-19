@@ -173,16 +173,8 @@ namespace web_ping
                     Error(e.GetType().ToString() + ":" + e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
                 }
 
-                if ((index+1) != Requests)
-                {
-                    // Wait interval and increment requests sent
-                    index++;
-                    Thread.Sleep(Interval);
-                }
-                else
-                {
-                    break;
-                }
+                index++;
+                Thread.Sleep(Interval);
             }
         }
 
