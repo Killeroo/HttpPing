@@ -7,8 +7,6 @@ A small tool that sends HTTP requests, presented in a ping-like style with statu
 Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/releases)
 ***
 ![alt text](HttpPing/Screenshots/screenshot1.png "HttpPing in action")
-![alt text](HttpPing/Screenshots/screenshot2.png "Supports Common Log Format")
-![alt text](HttpPing/Screenshots/screenshot3.png "and with no color too!")
 
 ## Features
 
@@ -31,6 +29,11 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
      
 ## Example 
      HttpPing.exe google.com -t -l
+     
+## Screenshots
+![alt text](HttpPing/Screenshots/screenshot2.png "Supports Common Log Format")
+![alt text](HttpPing/Screenshots/screenshot3.png "and with no color too!")
+
 ## License
 
 Requester is licensed under the [MIT license](LICENSE).
