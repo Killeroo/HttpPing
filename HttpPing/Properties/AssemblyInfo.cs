@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Requester")]
-[assembly: AssemblyDescription("Small ping-like tool capable of sending HTTP requests")]
+[assembly: AssemblyTitle("HttpPing")]
+[assembly: AssemblyDescription("Send HTTP requests as if they were pings!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Matthew Carney")]
-[assembly: AssemblyProduct("Requester")]
+[assembly: AssemblyProduct("HttpPing")]
 [assembly: AssemblyCopyright("Copyright © Matthew Carney 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
