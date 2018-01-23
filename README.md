@@ -6,9 +6,9 @@ A small tool that sends HTTP requests, presented in a ping-like style with statu
 
 Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/releases)
 ***
-![alt text](docs/Screenshots/screenshot1.png "HttpPing in action")
-![alt text](docs/Screenshots/screenshot2.png "Supports Common Log Format")
-![alt text](docs/Screenshots/screenshot3.png "and with no color too!")
+![alt text](HttpPing/Screenshots/screenshot1.png "HttpPing in action")
+![alt text](HttpPing/Screenshots/screenshot2.png "Supports Common Log Format")
+![alt text](HttpPing/Screenshots/screenshot3.png "and with no color too!")
 
 ## Features
 
