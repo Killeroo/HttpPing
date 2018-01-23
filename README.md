@@ -30,7 +30,7 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
 ## Example 
      HttpPing.exe google.com -t -l
      
-## Screenshots
+## More Screenshots
 ![alt text](HttpPing/Screenshots/screenshot2.png "Supports Common Log Format")
 ![alt text](HttpPing/Screenshots/screenshot3.png "and with no color too!")
 
