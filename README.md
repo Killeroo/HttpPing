@@ -18,7 +18,7 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
 - Common Log Format (NCSA log format)
 
 ## Usage: 
-     Requester web_address [-d] [-t] [-ts] [-n count] [-i interval]
+     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval]
                
 ## Arguments:
      [-d]           Detailed mode: shows server and cache info
@@ -29,6 +29,8 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
      [-l]           Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
      [-nc]          No color
      
+## Example 
+     HttpPing.exe google.com -t -l
 ## License
 
 Requester is licensed under the [MIT license](LICENSE).
