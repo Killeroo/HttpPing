@@ -1,12 +1,14 @@
-# Requester
+# HttpPing
 
 [![](https://img.shields.io/badge/version-1.0-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2018.svg)
 
 A small tool that sends HTTP requests, presented in a ping-like style with status codes and colored results.
 
-Download it here: [[Stable Releases]](https://github.com/Killeroo/Requester/releases)
+Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/releases)
 ***
-![alt text](docs/screenshots/screenshot.png "PowerPing in action")
+![alt text](docs/Screenshots/screenshot1.png "HttpPing in action")
+![alt text](docs/Screenshots/screenshot2.png "Supports Common Log Format")
+![alt text](docs/Screenshots/screenshot3.png "and with no color too!")
 
 ## Features
 
