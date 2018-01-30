@@ -9,29 +9,29 @@ namespace web_ping
     class Program
     {
         // Properties
-        public static bool Infinite = false;
-        public static bool Detailed = false;
-        public static bool Timestamp = false;
-        public static bool NoColor = false;
-        public static bool UseCommonLogFormat = false; 
-        public static int Interval = 30000;
-        public static int Requests = 5;
+        private static bool Infinite { get; set; } = false;
+        private static bool Detailed { get; set; } = false;
+        private static bool Timestamp { get; set; } = false;
+        private static bool NoColor { get; set; } = false;
+        private static bool UseCommonLogFormat { get; set; } = false;
+        private static int Interval { get; set; } = 30000;
+        private static int Requests { get; set; } = 5;
 
         // Console Properties
-        public static ConsoleColor DefaultBackgroundColor;
-        public static ConsoleColor DefaultForegroundColor;
+        private static ConsoleColor DefaultBackgroundColor { get; set; }
+        private static ConsoleColor DefaultForegroundColor { get; set; }
 
         // Constants
-        public const string USAGE = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc]";
+        private const string Usage = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc]";
 
         private static string resolvedAddress = "";
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // Arguments check
             if (args.Length == 0)
             {
-                Console.Write(USAGE);
+                Console.WriteLine(Usage);
                 Environment.Exit(0);
             }
 
@@ -40,7 +40,7 @@ namespace web_ping
             DefaultForegroundColor = Console.ForegroundColor;
 
             // Parse arguments
-            try 
+            try
             {
                 for (int count = 0; count < args.Length; count++)
                 {
@@ -50,7 +50,7 @@ namespace web_ping
                         case "-?":
                         case "--?":
                         case "/?":
-                            Console.WriteLine(USAGE);
+                            Console.WriteLine(Usage);
                             Environment.Exit(0);
                             break;
                         case "-i":
@@ -98,25 +98,31 @@ namespace web_ping
             catch (IndexOutOfRangeException)
             {
                 Error("Missing argument parameter");
-                Console.WriteLine(USAGE);
+                Console.WriteLine(Usage);
                 Environment.Exit(1);
             }
             catch (ArgumentException)
             {
                 Error("Incorrect argument found");
-                Console.WriteLine(USAGE);
+                Console.WriteLine(Usage);
                 Environment.Exit(1);
             }
             catch (FormatException)
             {
                 Error("Could not convert argument");
-                Console.WriteLine(USAGE);
+                Console.WriteLine(Usage);
+                Environment.Exit(1);
+            }
+            catch (OverflowException)
+            {
+                Error("Could not convert argument");
+                Console.WriteLine(Usage);
                 Environment.Exit(1);
             }
             catch (Exception e)
             {
                 Error(e.GetType().ToString());
-                Console.WriteLine(USAGE);
+                Console.WriteLine(Usage);
                 Environment.Exit(1);
             }
 
@@ -146,7 +152,7 @@ namespace web_ping
         }
 
         // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
-        static void HttpRequestLoop(string query)
+        private static void HttpRequestLoop(string query)
         {
             // Construct request
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(query);
@@ -157,28 +163,39 @@ namespace web_ping
             // Send requests
             int index = 0;
             Console.WriteLine("Sending HTTP requests to {0}:", query);
-            while (Infinite ? true : index <= Requests)
+
+            while (Infinite || index <= Requests)
             {
-                try
-                {
-                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                var response = HttpRequest(request);
+
+                if (response != null)
                     DisplayResponse(response, query);
-                }
-                catch (WebException e)
-                {
-                    Error(e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
-                }
-                catch (Exception e)
-                {
-                    Error(e.GetType().ToString() + ":" + e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
-                }
 
                 index++;
                 Thread.Sleep(Interval);
             }
         }
 
-        static void DisplayResponse(HttpWebResponse response, string address)
+        private static HttpWebResponse HttpRequest(HttpWebRequest req) 
+        {
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)req.GetResponse();
+                return response;
+            }
+            catch (WebException e)
+            {
+                Error(e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
+            }
+            catch (Exception e)
+            {
+                Error(e.GetType() + ":" + e.Message + (Timestamp ? " @ " + DateTime.Now.ToString("HH:mm:ss") : ""));
+            }
+
+            return null;
+        }
+
+        private static void DisplayResponse(HttpWebResponse response, string address)
         {
             // !!HACK ALERT!!
 
@@ -244,7 +261,7 @@ namespace web_ping
             Console.WriteLine();
         }
 
-        static string LookupAddress(string address)
+        private static string LookupAddress(string address)
         {
             IPAddress ipAddr = null;
 
@@ -274,7 +291,7 @@ namespace web_ping
             return ipAddr.ToString();
         }
 
-        static void Error(string msg)
+        private static void Error(string msg)
         {
             Console.BackgroundColor = ConsoleColor.Red;
             Console.ForegroundColor = ConsoleColor.Black;
@@ -282,7 +299,7 @@ namespace web_ping
             ResetConsoleColors();
         }
 
-        static void ResetConsoleColors()
+        private static void ResetConsoleColors()
         {
             Console.BackgroundColor = DefaultBackgroundColor;
             Console.ForegroundColor = DefaultForegroundColor;
