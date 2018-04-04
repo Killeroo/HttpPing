@@ -16,16 +16,17 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
 - Common Log Format (NCSA log format)
 
 ## Usage: 
-     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval]
+     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval] [-r redirectCount]
                
 ## Arguments:
-     [-d]           Detailed mode: shows server and cache info
-     [-t]           Infinite mode: Keep sending requests until stopped (Ctrl-C)
-     [-n count]     Send a specific number of requests
-     [-ts]          Include timestamp of when each request was sent
-     [-i interval]  Interval between each request in milliseconds (default 30000)
-     [-l]           Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
-     [-nc]          No color
+     [-d]                   Detailed mode: shows server and cache info
+     [-t]                   Infinite mode: Keep sending requests until stopped (Ctrl-C)
+     [-n count]             Send a specific number of requests
+     [-ts]                  Include timestamp of when each request was sent
+     [-i interval]          Interval between each request in milliseconds (default 30000)
+     [-l]                   Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
+     [-nc]                  No color
+     [-r redirectCount]     Follow redirect requests a maximum number of times (default 4)
      
 ## Example 
      HttpPing.exe google.com -t -l

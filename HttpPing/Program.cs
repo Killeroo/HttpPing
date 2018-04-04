@@ -16,13 +16,14 @@ namespace web_ping
         private static bool UseCommonLogFormat { get; set; } = false;
         private static int Interval { get; set; } = 30000;
         private static int Requests { get; set; } = 5;
+        private static int Redirects { get; set; } = 4;
 
         // Console Properties
         private static ConsoleColor DefaultBackgroundColor { get; set; }
         private static ConsoleColor DefaultForegroundColor { get; set; }
 
         // Constants
-        private const string Usage = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc]";
+        private const string Usage = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc] [-r redirectCount]";
 
         private static string resolvedAddress = "";
 
@@ -50,8 +51,7 @@ namespace web_ping
                         case "-?":
                         case "--?":
                         case "/?":
-                            Console.WriteLine(Usage);
-                            Environment.Exit(0);
+                            Exit();
                             break;
                         case "-i":
                         case "--i":
@@ -88,6 +88,15 @@ namespace web_ping
                         case "/ts":
                             Timestamp = true;
                             break;
+                        case "-r":
+                        case "--r":
+                        case "/r":
+                            Redirects = Convert.ToInt32(args[count + 1]);
+                            if (Redirects <= 0)
+                            {
+                                Exit("Number of redirects must be higher than 0");
+                            }
+                            break;
                         default:
                             if (arg.Contains("-"))
                                 throw new ArgumentException();
@@ -97,33 +106,23 @@ namespace web_ping
             }
             catch (IndexOutOfRangeException)
             {
-                Error("Missing argument parameter");
-                Console.WriteLine(Usage);
-                Environment.Exit(1);
+                Exit("Missing argument parameter");
             }
             catch (ArgumentException)
             {
-                Error("Incorrect argument found");
-                Console.WriteLine(Usage);
-                Environment.Exit(1);
+                Exit("Incorrect argument found");
             }
             catch (FormatException)
             {
-                Error("Could not convert argument");
-                Console.WriteLine(Usage);
-                Environment.Exit(1);
+                Exit("Could not convert argument");
             }
             catch (OverflowException)
             {
-                Error("Could not convert argument");
-                Console.WriteLine(Usage);
-                Environment.Exit(1);
+                Exit("Could not convert argument");
             }
             catch (Exception e)
             {
-                Error(e.GetType().ToString());
-                Console.WriteLine(Usage);
-                Environment.Exit(1);
+                Exit(e.GetType().ToString());
             }
 
             // Find address
@@ -134,8 +133,7 @@ namespace web_ping
                 query = args.Last();
             else
             {
-                Error("Could not find URL/Web address");
-                Environment.Exit(1);
+                Exit("Could not find URL/Web address");
             }
             // Add http part if not already there
             if (!query.Contains("http"))
@@ -156,7 +154,7 @@ namespace web_ping
         {
             // Construct request
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(query);
-            request.MaximumAutomaticRedirections = 4;
+            request.MaximumAutomaticRedirections = Redirects;
             request.AutomaticDecompression = DecompressionMethods.GZip;
             request.Credentials = CredentialCache.DefaultCredentials;
 
@@ -303,6 +301,15 @@ namespace web_ping
         {
             Console.BackgroundColor = DefaultBackgroundColor;
             Console.ForegroundColor = DefaultForegroundColor;
+        }
+
+        private static void Exit(string message = null)
+        {
+            if (!string.IsNullOrEmpty(message))
+                Error(message);
+
+            Console.WriteLine(Usage);
+            Environment.Exit(1);
         }
     }
 }
