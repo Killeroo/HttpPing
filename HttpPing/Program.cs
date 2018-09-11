@@ -14,6 +14,7 @@ namespace web_ping
         private static bool Timestamp { get; set; } = false;
         private static bool NoColor { get; set; } = false;
         private static bool UseCommonLogFormat { get; set; } = false;
+        private static bool ForceHttps { get; set; } = false;
         private static int Interval { get; set; } = 30000;
         private static int Requests { get; set; } = 5;
         private static int Redirects { get; set; } = 4;
@@ -97,6 +98,11 @@ namespace web_ping
                                 Exit("Number of redirects must be higher than 0");
                             }
                             break;
+                        case "-https":
+                        case "--https":
+                        case "/https":
+                        	ForceHttps = true;
+                        	break;
                         default:
                             if (arg.Contains("-"))
                                 throw new ArgumentException();
@@ -135,9 +141,25 @@ namespace web_ping
             {
                 Exit("Could not find URL/Web address");
             }
-            // Add http part if not already there
-            if (!query.Contains("http"))
-                query = query.Insert(0, "http://");
+
+			// Modify any exting scheme if we are forcing https
+			if (query.Contains("http") && !query.Contains("https"))
+			{
+				query = query.Insert(4, "s")
+			}
+            
+            // Add http scheme if not present
+            if (!query.Contains("http")) 
+            {
+            	if (ForceHttps) 
+            	{
+          			query = query.Insert(0, "https://");
+            	} 
+            	else 
+            	{
+          			query = query.Insert(0, "http://");
+            	}
+            }
 
             // Extract host and perform DNS lookup
             Uri queryUri = new Uri(query);
