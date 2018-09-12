@@ -145,7 +145,7 @@ namespace web_ping
 			// Modify any exting scheme if we are forcing https
 			if (query.Contains("http") && !query.Contains("https"))
 			{
-				query = query.Insert(4, "s")
+				query = query.Insert(4, "s");
 			}
             
             // Add http scheme if not present
