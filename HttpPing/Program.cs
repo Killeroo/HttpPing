@@ -24,7 +24,7 @@ namespace web_ping
         private static ConsoleColor DefaultForegroundColor { get; set; }
 
         // Constants
-        private const string Usage = "USAGE: Requester web_address [-d] [-t] [-ts] [-n count] [-i interval] [-l] [-nc] [-r redirectCount]";
+        private const string Usage = "USAGE: HttpPing web_address [-d] [-t] [-ts] [-https] [-n count] [-i interval] [-l] [-nc] [-r redirectCount] ";
 
         private static string resolvedAddress = "";
 
@@ -182,7 +182,7 @@ namespace web_ping
 
             // Send requests
             int index = 0;
-            Console.WriteLine("Sending HTTP requests to {0}:", query);
+            Console.WriteLine("Sending HTTP requests to [{0}]:", query);
 
             while (Infinite || index <= Requests)
             {
