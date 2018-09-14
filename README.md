@@ -16,7 +16,7 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
 - Common Log Format (NCSA log format)
 
 ## Usage: 
-     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval] [-r redirectCount]
+     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval] [-r redirectCount] [-https]
                
 ## Arguments:
      [-d]                   Detailed mode: shows server and cache info
@@ -27,6 +27,7 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
      [-l]                   Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
      [-nc]                  No color
      [-r redirectCount]     Follow redirect requests a maximum number of times (default 4)
+     [-https]               Force requests to use https
      
 ## Example 
      HttpPing.exe google.com -t -l
