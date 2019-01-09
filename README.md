@@ -1,6 +1,6 @@
 # HttpPing
 
-[![](https://img.shields.io/badge/version-1.0-brightgreen.svg)]() ![](https://img.shields.io/maintenance/yes/2018.svg) [![Build status](https://ci.appveyor.com/api/projects/status/q7lchn78v07pmemj?svg=true)](https://ci.appveyor.com/project/Killeroo/httpping)
+[![](https://img.shields.io/badge/version-1.0-brightgreen.svg)]() [![Build status](https://ci.appveyor.com/api/projects/status/q7lchn78v07pmemj?svg=true)](https://ci.appveyor.com/project/Killeroo/httpping)
 
 A small tool that sends HTTP requests, presented in a ping-like style with status codes and colored results.
 
