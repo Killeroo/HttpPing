@@ -3,6 +3,10 @@ using System.Reflection;
 using System.Net;
 using System.Threading;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using HttpPing.Interfaces;
+using HttpPing;
+
 
 namespace web_ping
 {
@@ -28,13 +32,24 @@ namespace web_ping
 
         private static string resolvedAddress = "";
 
-        private static void Main(string[] args)
+        private static IEnvironmentService EnvironmentService;
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args">Arguments</param>
+        /// <param name="environmentService">Enviroment (wrapper for test)</param>
+        internal static void Main(string[] args, IEnvironmentService environmentService)
         {
+            EnvironmentService = environmentService;
+
             // Arguments check
             if (args.Length == 0)
             {
                 Console.WriteLine(Usage);
-                Environment.Exit(0);
+                EnvironmentService.Exit(0);
+                return;
             }
 
             // Save console colors
@@ -131,6 +146,8 @@ namespace web_ping
                 Exit(e.GetType().ToString());
             }
 
+            if (EnvironmentService.IsExit) return;
+
             // Find address
             string query = "";
             if (Uri.IsWellFormedUriString(args.First(), UriKind.RelativeOrAbsolute))
@@ -140,6 +157,7 @@ namespace web_ping
             else
             {
                 Exit("Could not find URL/Web address");
+                if (EnvironmentService.IsExit) return;
             }
 
 			// Modify any exting scheme if we are forcing https
@@ -170,6 +188,17 @@ namespace web_ping
 
             // Results?
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
+        internal static void Main(string[] args)
+        {
+            Main(args, new EnvironmentService());
+        }
+
 
         // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
         private static void HttpRequestLoop(string query)
@@ -331,7 +360,7 @@ namespace web_ping
                 Error(message);
 
             Console.WriteLine(Usage);
-            Environment.Exit(1);
+            EnvironmentService.Exit(1);
         }
     }
 }
