@@ -62,6 +62,7 @@ namespace web_ping
                 for (int count = 0; count < args.Length; count++)
                 {
                     string arg = args[count];
+
                     switch (arg)
                     {
                         case "-?":
@@ -119,9 +120,14 @@ namespace web_ping
                         	ForceHttps = true;
                         	break;
                         default:
-                            if (arg.Contains("-"))
-                                throw new ArgumentException();
+                            if (count > 0)
+                            {
+                                if (arg.Contains("-"))
+                                    throw new ArgumentException();
+                            }
                             break;
+
+
                     }
                 }
             }
