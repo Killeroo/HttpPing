@@ -36,10 +36,10 @@ namespace web_ping
 
 
         /// <summary>
-        /// 
+        /// This method is the entry point of the program, with the test parameter environment it wrapper exit for test purpose
         /// </summary>
-        /// <param name="args">Arguments</param>
-        /// <param name="environmentService">Enviroment (wrapper for test)</param>
+        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
+        /// <param name="environmentService">Environment (wrapper for test)</param>
         internal static void Main(string[] args, IEnvironmentService environmentService)
         {
             EnvironmentService = environmentService;
@@ -196,9 +196,9 @@ namespace web_ping
 
 
         /// <summary>
-        /// 
+        /// This method is the entry point of the program
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
         internal static void Main(string[] args)
         {
             Main(args, new EnvironmentService());
