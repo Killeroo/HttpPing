@@ -127,7 +127,6 @@ namespace web_ping
                             }
                             break;
 
-
                     }
                 }
             }
