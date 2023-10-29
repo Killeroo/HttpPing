@@ -9,13 +9,13 @@ namespace HttpPing.Tests
 {
     internal class EnvironmentServiceForTestPurpose : IEnvironmentService
     {
-        private bool _isExist = false;
+        private bool _hasExited = false;
 
-        public bool IsExit => _isExist;
+        public bool HasExited => _hasExited;
 
         public void Exit(int exitCode)
         {
-            _isExist = true;
+            _hasExited = true;
         }
     }
 }

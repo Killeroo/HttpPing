@@ -151,7 +151,7 @@ namespace web_ping
                 Exit(e.GetType().ToString());
             }
 
-            if (EnvironmentService.IsExit) return;
+            if (EnvironmentService.HasExited) return;
 
             // Find address
             string query = "";
@@ -162,7 +162,7 @@ namespace web_ping
             else
             {
                 Exit("Could not find URL/Web address");
-                if (EnvironmentService.IsExit) return;
+                if (EnvironmentService.HasExited) return;
             }
 
 			// Modify any exting scheme if we are forcing https

@@ -8,7 +8,7 @@ namespace HttpPing.Interfaces
 {
     internal interface IEnvironmentService
     {
-        bool IsExit { get; }
+        bool HasExited { get; }
         void Exit(int exitCode);
     }
 }

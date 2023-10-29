@@ -6,7 +6,7 @@ namespace HttpPing
 {
     internal class EnvironmentService : IEnvironmentService
     {
-        public bool IsExit { get; }
+        public bool HasExited { get; }
 
         public void Exit(int exitCode)
         {
