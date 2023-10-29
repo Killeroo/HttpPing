@@ -3,6 +3,10 @@ using System.Reflection;
 using System.Net;
 using System.Threading;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using HttpPing.Interfaces;
+using HttpPing;
+
 
 namespace web_ping
 {
@@ -28,13 +32,24 @@ namespace web_ping
 
         private static string resolvedAddress = "";
 
-        private static void Main(string[] args)
+        private static IEnvironmentService EnvironmentService;
+
+
+        /// <summary>
+        /// This method is the entry point of the program, with the test parameter environment it wrapper exit for test purpose
+        /// </summary>
+        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
+        /// <param name="environmentService">Environment (wrapper for test)</param>
+        internal static void Main(string[] args, IEnvironmentService environmentService)
         {
+            EnvironmentService = environmentService;
+
             // Arguments check
             if (args.Length == 0)
             {
                 Console.WriteLine(Usage);
-                Environment.Exit(0);
+                EnvironmentService.Exit(0);
+                return;
             }
 
             // Save console colors
@@ -47,6 +62,7 @@ namespace web_ping
                 for (int count = 0; count < args.Length; count++)
                 {
                     string arg = args[count];
+
                     switch (arg)
                     {
                         case "-?":
@@ -104,9 +120,13 @@ namespace web_ping
                         	ForceHttps = true;
                         	break;
                         default:
-                            if (arg.Contains("-"))
-                                throw new ArgumentException();
+                            if (count > 0)
+                            {
+                                if (arg.Contains("-"))
+                                    throw new ArgumentException();
+                            }
                             break;
+
                     }
                 }
             }
@@ -131,6 +151,8 @@ namespace web_ping
                 Exit(e.GetType().ToString());
             }
 
+            if (EnvironmentService.HasExited) return;
+
             // Find address
             string query = "";
             if (Uri.IsWellFormedUriString(args.First(), UriKind.RelativeOrAbsolute))
@@ -140,6 +162,7 @@ namespace web_ping
             else
             {
                 Exit("Could not find URL/Web address");
+                if (EnvironmentService.HasExited) return;
             }
 
 			// Modify any exting scheme if we are forcing https
@@ -170,6 +193,17 @@ namespace web_ping
 
             // Results?
         }
+
+
+        /// <summary>
+        /// This method is the entry point of the program
+        /// </summary>
+        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
+        internal static void Main(string[] args)
+        {
+            Main(args, new EnvironmentService());
+        }
+
 
         // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
         private static void HttpRequestLoop(string query)
@@ -331,7 +365,7 @@ namespace web_ping
                 Error(message);
 
             Console.WriteLine(Usage);
-            Environment.Exit(1);
+            EnvironmentService.Exit(1);
         }
     }
 }
