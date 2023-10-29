@@ -6,7 +6,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using HttpPing.Interfaces;
 using HttpPing;
-
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
 
 namespace web_ping
 {
@@ -19,16 +20,37 @@ namespace web_ping
         private static bool NoColor { get; set; } = false;
         private static bool UseCommonLogFormat { get; set; } = false;
         private static bool ForceHttps { get; set; } = false;
-        private static int Interval { get; set; } = 30000;
+        private static bool ShowOnlyHostName { get; set; } = false;
+        private static int Interval { get; set; } = 1000;
         private static int Requests { get; set; } = 5;
         private static int Redirects { get; set; } = 4;
 
-        // Console Properties
-        private static ConsoleColor DefaultBackgroundColor { get; set; }
-        private static ConsoleColor DefaultForegroundColor { get; set; }
-
         // Constants
-        private const string Usage = "USAGE: HttpPing web_address [-d] [-t] [-ts] [-https] [-n count] [-i interval] [-l] [-nc] [-r redirectCount] ";
+        public const string UsageMessage = "HttpPing.exe address [-d] [-t] [-ts] [-h] [-n count] [-i interval] [-r redirectCount] [-https]";
+        public const string HelpMessage = 
+@"HttpPing 1.1 
+
+Description:
+    Send http requests as if they were pings!
+
+Usage: 
+    HttpPing web_address [-d] [-t] [-ts] [-h] [-https] [-n count] [-i interval] [-l] [-nc] [-r redirectCount] 
+
+Arguments:
+     [-d]                   Detailed mode: shows server and cache info
+     [-t]                   Infinite mode: Keep sending requests until stopped (Ctrl-C)
+     [-n count]             Send a specific number of requests
+     [-ts]                  Include timestamp of when each request was sent
+     [-h]                   Only show the hostname in responses
+     [-i interval]          Interval between each request in milliseconds (default 30000)
+     [-l]                   Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
+     [-nc]                  No color
+     [-r redirectCount]     Follow redirect requests a maximum number of times (default 4)
+     [-https]               Force requests to use https
+
+You can find the project and it's code on github: https://github.com/Killeroo/HttpPing
+Maintained by Matthew Carney [matthewcarney64@gmail.com]
+";
 
         private static string resolvedAddress = "";
 
@@ -36,25 +58,33 @@ namespace web_ping
 
 
         /// <summary>
+        /// This method is the entry point of the program
+        /// </summary>
+        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
+        internal static void Main(string[] args)
+        {
+            Run(args, new EnvironmentService());
+        }
+
+        /// <summary>
         /// This method is the entry point of the program, with the test parameter environment it wrapper exit for test purpose
         /// </summary>
         /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
         /// <param name="environmentService">Environment (wrapper for test)</param>
-        internal static void Main(string[] args, IEnvironmentService environmentService)
+        internal static void Run(string[] args, IEnvironmentService environmentService)
         {
             EnvironmentService = environmentService;
+
+            // Some hack to get tests to work lol
+            ResetArgsForTest();
 
             // Arguments check
             if (args.Length == 0)
             {
-                Console.WriteLine(Usage);
+                Console.WriteLine(HelpMessage);
                 EnvironmentService.Exit(0);
                 return;
             }
-
-            // Save console colors
-            DefaultBackgroundColor = Console.BackgroundColor;
-            DefaultForegroundColor = Console.ForegroundColor;
 
             // Parse arguments
             try
@@ -68,7 +98,11 @@ namespace web_ping
                         case "-?":
                         case "--?":
                         case "/?":
-                            Exit();
+                        case "-help":
+                        case "--help":
+                        case "/help":
+                            Console.WriteLine(HelpMessage);
+                            environmentService.Exit(0);
                             break;
                         case "-i":
                         case "--i":
@@ -105,6 +139,11 @@ namespace web_ping
                         case "/ts":
                             Timestamp = true;
                             break;
+                        case "-h":
+                        case "--h":
+                        case "/h":
+                            ShowOnlyHostName = true;
+                            break;
                         case "-r":
                         case "--r":
                         case "/r":
@@ -122,8 +161,15 @@ namespace web_ping
                         default:
                             if (count > 0)
                             {
-                                if (arg.Contains("-"))
-                                    throw new ArgumentException();
+                                if (arg.Contains("-") || arg.Contains("/"))
+                                {
+                                    // If argument isn't a url then throw and exception
+                                    if (!Uri.IsWellFormedUriString(arg, UriKind.Absolute))
+                                    {
+                                        throw new ArgumentException();
+                                    }
+                                }
+
                             }
                             break;
 
@@ -194,20 +240,29 @@ namespace web_ping
             // Results?
         }
 
-
-        /// <summary>
-        /// This method is the entry point of the program
-        /// </summary>
-        /// <param name="args">Array of strings that contains the command-line arguments passed to the program</param>
-        internal static void Main(string[] args)
+        public static void ResetArgsForTest()
         {
-            Main(args, new EnvironmentService());
+            Infinite = false;
+            Detailed = false;
+            Timestamp = false;
+            NoColor = false;
+            UseCommonLogFormat = false;
+            ForceHttps = false;
+            ShowOnlyHostName = false;
+            Interval = 1000;
+            Requests = 5;
+            Redirects = 4;
         }
-
 
         // SO: https://stackoverflow.com/questions/27108264/c-sharp-how-to-properly-make-a-http-web-get-request
         private static void HttpRequestLoop(string query)
         {
+            // Setup ServicePointManager to handle http verfication
+            // Source: https://stackoverflow.com/a/2904963
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ServerCertificateValidationCallback);
+
             // Construct request
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(query);
             request.MaximumAutomaticRedirections = Redirects;
@@ -215,19 +270,33 @@ namespace web_ping
             request.Credentials = CredentialCache.DefaultCredentials;
 
             // Send requests
-            int index = 0;
-            Console.WriteLine("Sending HTTP requests to [{0}]:", query);
+            int sentRequests = 0;
+            Console.WriteLine("Sending HTTP{1} requests to [{0}]:", query, query.Contains("https://") ? "S" : "");
 
-            while (Infinite || index <= Requests)
+            while(true)
             {
                 var response = HttpRequest(request);
 
                 if (response != null)
-                    DisplayResponse(response, query);
+                    DisplayResponse(response, response.ResponseUri);
 
-                index++;
+                sentRequests++;
+
+                if (!Infinite && sentRequests == Requests)
+                {
+                    // Finish loop if we have sent all the requests and not infinitely sending
+                    break;
+                }
+
+                // Wait interval before sending next request
                 Thread.Sleep(Interval);
             }
+        }
+
+        private static bool ServerCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            // Verify all requests to verify cerificates on our end
+            return true;
         }
 
         private static HttpWebResponse HttpRequest(HttpWebRequest req) 
@@ -249,12 +318,14 @@ namespace web_ping
             return null;
         }
 
-        private static void DisplayResponse(HttpWebResponse response, string address)
+        private static void DisplayResponse(HttpWebResponse response, Uri responseAddress)
         {
             // !!HACK ALERT!!
 
             if (!UseCommonLogFormat)
-                Console.Write("Response from {0}: Code=", new Uri(address).Host.ToString());
+            {
+                Console.Write("Response from {0}: Code=", ShowOnlyHostName ? responseAddress.Host.ToString() : responseAddress.ToString());
+            }
 
             if (!NoColor)
             {
@@ -283,12 +354,11 @@ namespace web_ping
 
             if (UseCommonLogFormat)
             {
-                Uri addrUri = new Uri(address);
                 Console.WriteLine("{6} {0} [{1:dd/MMM/yyyy HH:mm:ss zzz}] \"GET {2} {3}/1.0\" {4} {5}",
-                                  addrUri.Host,
+                                  responseAddress.Host,
                                   DateTime.Now,
-                                  addrUri.AbsolutePath,
-                                  addrUri.Scheme.ToString().ToUpper(),
+                                  responseAddress.AbsolutePath,
+                                  responseAddress.Scheme.ToString().ToUpper(),
                                   ((int)response.StatusCode).ToString(),
                                   response.ContentLength,
                                   resolvedAddress);
@@ -355,8 +425,7 @@ namespace web_ping
 
         private static void ResetConsoleColors()
         {
-            Console.BackgroundColor = DefaultBackgroundColor;
-            Console.ForegroundColor = DefaultForegroundColor;
+            Console.ResetColor();
         }
 
         private static void Exit(string message = null)
@@ -364,7 +433,7 @@ namespace web_ping
             if (!string.IsNullOrEmpty(message))
                 Error(message);
 
-            Console.WriteLine(Usage);
+            Console.WriteLine(UsageMessage);
             EnvironmentService.Exit(1);
         }
     }

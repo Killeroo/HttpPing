@@ -1,10 +1,10 @@
 # HttpPing
 
-[![](https://img.shields.io/badge/version-1.0-brightgreen.svg)]() [![Build status](https://ci.appveyor.com/api/projects/status/q7lchn78v07pmemj?svg=true)](https://ci.appveyor.com/project/Killeroo/httpping)
+[![](https://img.shields.io/badge/version-1.1-brightgreen.svg)](https://github.com/Killeroo/HttpPing/releases)
 
 A small tool that sends HTTP requests, presented in a ping-like style with status codes and colored results.
 
-Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/releases) [[Nightly Build]](https://ci.appveyor.com/api/projects/killeroo/httpping/artifacts/HttpPing%2Fbin%2FDebug%2FHttpPing.exe)
+Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/releases)
 ***
 ![alt text](HttpPing/Screenshots/screenshot1.png "HttpPing in action")
 
@@ -16,13 +16,14 @@ Download it here: [[Stable Releases]](https://github.com/Killeroo/HttpPing/relea
 - Common Log Format (NCSA log format)
 
 ## Usage: 
-     HttpPing.exe address [-d] [-t] [-ts] [-n count] [-i interval] [-r redirectCount] [-https]
+     HttpPing.exe address [-d] [-t] [-ts] [-h] [-n count] [-i interval] [-r redirectCount] [-https]
                
 ## Arguments:
      [-d]                   Detailed mode: shows server and cache info
      [-t]                   Infinite mode: Keep sending requests until stopped (Ctrl-C)
      [-n count]             Send a specific number of requests
      [-ts]                  Include timestamp of when each request was sent
+     [-h]                   Only show the hostname in responses
      [-i interval]          Interval between each request in milliseconds (default 30000)
      [-l]                   Use Common Log Format (https://en.wikipedia.org/wiki/Common_Log_Format)
      [-nc]                  No color

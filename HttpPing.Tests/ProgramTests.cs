@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using web_ping;
 
 namespace HttpPing.Tests
 {
@@ -22,48 +23,172 @@ namespace HttpPing.Tests
         }
 
         [TestMethod]
-        public void When_params_are_empty_should_return_usage_test()
+        public void When_params_are_empty_should_return_help_test()
         {
-            var expectedValue = "USAGE: HttpPing web_address [-d] [-t] [-ts] [-https] [-n count] [-i interval] [-l] [-nc] [-r redirectCount] \r\n";
+            string expectedValue = Program.HelpMessage.Replace("\r\n", "");
 
             string[] parameters = new string[]{};
 
-            web_ping.Program.Main(parameters, _environmentServiceForTestPurpose);
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
 
-
-            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedValue));
+            Assert.IsTrue(actualOutput.ToString().Equals(expectedValue));
         }
-
 
         [TestMethod]
-        public void When_params_webaddress_simple_count_1_interval_500ms_should_response_test()
+        public void When_show_help_argument_show_help_message_test()
         {
-            var expectedValue = "Sending HTTP requests to [https://www.starwars.com]:\r\nResponse from www.starwars.com: Code=200:OK Size=-1\r\nResponse from www.starwars.com: Code=200:OK Size=-1\r\n";
+            string expectedValue = Program.HelpMessage.Replace("\r\n", "");
 
-            string[] parameters = new string[] { "https://www.starwars.com", 
-                                                "-n", "1",
-                                                "-i", "500" };
+            string[] parameters = new string[] { "-help" };
 
-            web_ping.Program.Main(parameters, _environmentServiceForTestPurpose);
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
 
-            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedValue));
+            Assert.IsTrue(actualOutput.ToString().Equals(expectedValue));
         }
 
+        [TestMethod]
+        public void When_full_uri_path_should_be_displayed_test()
+        {
+            string expectedOutput = 
+@"Sending HTTPS requests to [https://github.com/Killeroo]:
+Response from https://github.com/Killeroo: Code=200:OK Size=-1
+";
+
+            string[] parameters = new string[] { "https://github.com/Killeroo",
+                                                "-n", "1"};
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+
+            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_hosts_only_argument_uri_path_should_not_be_displayed_test()
+        {
+            string expectedOutput =
+@"Sending HTTPS requests to [https://github.com/Killeroo]:
+Response from github.com: Code=200:OK Size=-1
+";
+
+            string[] parameters = new string[] { "https://github.com/Killeroo",
+                                                "-n", "1",
+                                                "-h"};
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+
+            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_bad_argument_throw_exception_test()
+        {
+            string expectedOutput =
+@"Incorrect argument found
+" + Program.UsageMessage + @"
+";
+
+            string[] parameters = new string[] { "https://github.com/Killeroo",
+                                                "-n", "1",
+                                                "-notrealargument"};
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+
+            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_request_count_is_one_only_one_request_is_sent_test()
+        {
+            string expectedOutput =
+@"Sending HTTPS requests to [https://github.com/Killeroo]:
+Response from https://github.com/Killeroo: Code=200:OK Size=-1
+".Replace("\r\n", "");
+
+            string[] parameters = new string[] { "https://github.com/Killeroo",
+                                                "-n", "1"};
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
+
+            Assert.IsTrue(actualOutput.Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_request_count_is_two_then_two_requests_are_sent_test()
+        {
+            string expectedOutput =
+@"Sending HTTPS requests to [https://github.com/]:
+Response from https://github.com/: Code=200:OK Size=-1
+Response from https://github.com/: Code=200:OK Size=-1
+".Replace("\r\n", "");
+
+            string[] parameters = new string[] { "https://github.com/",
+                                                "-n", "2"};
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
+
+            Assert.IsTrue(actualOutput.Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_no_params_url_is_google_http_should_respond_test()
+        {
+            string expectedOutput =
+@"Sending HTTP requests to [http://www.google.com]:
+Response from http://www.google.com/: Code=200:OK Size=-1
+Response from http://www.google.com/: Code=200:OK Size=-1
+Response from http://www.google.com/: Code=200:OK Size=-1
+Response from http://www.google.com/: Code=200:OK Size=-1
+Response from http://www.google.com/: Code=200:OK Size=-1
+".Replace("\r\n", "");
+
+            string[] parameters = new string[] { "http://www.google.com" };
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
+
+            Assert.IsTrue(actualOutput.Equals(expectedOutput));
+        }
+
+        [TestMethod]
+        public void When_no_params_url_is_google_https_should_respond_test()
+        {
+            string expectedOutput =
+@"Sending HTTPS requests to [https://www.google.com]:
+Response from https://www.google.com/: Code=200:OK Size=-1
+Response from https://www.google.com/: Code=200:OK Size=-1
+Response from https://www.google.com/: Code=200:OK Size=-1
+Response from https://www.google.com/: Code=200:OK Size=-1
+Response from https://www.google.com/: Code=200:OK Size=-1
+".Replace("\r\n", "");
+
+            string[] parameters = new string[] { "https://www.google.com" };
+
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
+
+            Assert.IsTrue(actualOutput.Equals(expectedOutput));
+        }
 
         [TestMethod]
         public void When_params_webaddress_contains_dash_should_not_return_error_test()
         {
-            //var expectedValue = "Incorrect argument found\r\nUSAGE: HttpPing web_address [-d] [-t] [-ts] [-https] [-n count] [-i interval] [-l] [-nc] [-r redirectCount] \r\n";
-            var expectedValue = "Sending HTTP requests to [https://www.star-wars.com]:\r\nResponse from www.star-wars.com: Code=200:OK Size=-1\r\nResponse from www.star-wars.com: Code=200:OK Size=-1\r\n";
-
+            string expectedOutput =
+@"Sending HTTPS requests to [https://www.star-wars.com]:
+Response from https://www.starwars.com/: Code=200:OK Size=-1
+".Replace("\r\n", "");
 
             string[] parameters = new string[] { "https://www.star-wars.com",
                                                 "-n", "1",
                                                 "-i", "500" };
 
-            web_ping.Program.Main(parameters, _environmentServiceForTestPurpose);
+            web_ping.Program.Run(parameters, _environmentServiceForTestPurpose);
+            string actualOutput = _consoleOutput.ToString().Replace("\r\n", "");
 
-            Assert.IsTrue(_consoleOutput.ToString().Equals(expectedValue));
+            Assert.IsTrue(actualOutput.Equals(expectedOutput));
         }
     }
 }
